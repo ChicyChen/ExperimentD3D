@@ -32,8 +32,8 @@ import json
 import csv
 
 
-SAPIEN_FOLDER = './partnet-mobility-v0'
-OUT_FOLDER = './cad_sapien'
+SAPIEN_FOLDER = '/data/siyich/sapien_dataset_d3dhoi'
+OUT_FOLDER = '/data/siyich/cad_sapien_2'
 
 
 # helper function for computing roation matrix in 3D
@@ -105,29 +105,29 @@ def merge_meshes(save_folder, ids, mesh_dict):
 part_home = SAPIEN_FOLDER 
 save_home = OUT_FOLDER 
 
-classes = ['StorageFurniture','Microwave','Laptop','WashingMachine','TrashCan','Oven',
-           'Dishwasher','Refrigerator']  # 8 categories
+classes = ['storageFurniture','microwave','laptop','washingMachine','trashCan','oven',
+           'dishwasher','refrigerator']  # 8 categories
 
 # Manually verify the part category
 careParts = {}
-careParts['Refrigerator'] = ['door', 'other_leaf', 'display_panel', 'door_frame',
+careParts['refrigerator'] = ['door', 'other_leaf', 'display_panel', 'door_frame',
                              'control_panel', 'glass']
-careParts['Microwave'] = ['door']
-careParts['Laptop'] =  ['shaft', 'other_leaf', 'screen_side', 'screen', 'screen_frame']
-careParts['WashingMachine'] =  ['door']
-careParts['TrashCan'] =  ['opener', 'lid', 'drawer', 'cover', 'cover_lid',
+careParts['microwave'] = ['door']
+careParts['laptop'] =  ['shaft', 'other_leaf', 'screen_side', 'screen', 'screen_frame']
+careParts['washingMachine'] =  ['door']
+careParts['trashCan'] =  ['opener', 'lid', 'drawer', 'cover', 'cover_lid',
                           'frame_vertical_bar', 'container', 'other_leaf']
-careParts['Oven'] = ['door', 'door_frame']
-careParts['Dishwasher'] = ['door', 'shelf', 'display_panel', 'door_frame']
-careParts['StorageFurniture'] =  ['cabinet_door', 'mirror', 'drawer', 'drawer_box',
+careParts['oven'] = ['door', 'door_frame']
+careParts['dishwasher'] = ['door', 'shelf', 'display_panel', 'door_frame']
+careParts['storageFurniture'] =  ['cabinet_door', 'mirror', 'drawer', 'drawer_box',
                                   'door', 'shelf', 'handle', 'glass', 'cabinet_door_surface',
                                   'other_leaf', 'countertop']
-careParts['Toilet'] = ['lid', 'seat']
-#careParts['Table'] = ['drawer', 'cabinet_door_surface', 'drawer_box', 'handle',
+careParts['toilet'] = ['lid', 'seat']
+#careParts['table'] = ['drawer', 'cabinet_door_surface', 'drawer_box', 'handle',
                       #'drawer_front', 'board', 'cabinet_door', 'shelf', 'keyboard_tray_surface']
-#careParts['Box'] =  ['rotation_lid', 'drawer', 'countertop', 'lid_surface']  # font on top
-#careParts['FoldingChair'] = ['seat']
-#careParts['Suitcase'] =  ['lid', 'pull-out_handle']
+#careParts['box'] =  ['rotation_lid', 'drawer', 'countertop', 'lid_surface']  # font on top
+#careParts['foldingChair'] = ['seat']
+#careParts['suitcase'] =  ['lid', 'pull-out_handle']
 
 
 count = 0
@@ -136,19 +136,20 @@ count = 0
 with open('partnetsim.models.csv', 'r') as file:
     reader = csv.DictReader(file)
     for row in reader:
-        if row['category'] in classes:
-            part_dir = row['category']
+        if row['category'].lower() in classes:
+            part_dir = row['category'].lower()
             part_id = row['dirId']
             part_folder = os.path.join(part_home, str(part_id))
+
+            # load meshes referenced json file
+            if not os.path.isfile(os.path.join(part_folder, 'result.json')):
+                continue  
+
             save_folder = os.path.join(save_home, part_dir, str(part_id))
             if not os.path.exists(save_folder):
                 os.makedirs(save_folder)
             count+=1
-
-                
-            # load meshes referenced json file
-            if not os.path.isfile(os.path.join(part_folder, 'result.json')):
-                continue  
+            
             with open(os.path.join(part_folder, 'result.json')) as json_file:
                 part_meshes = json.load(json_file)
                 # traverse through a tree

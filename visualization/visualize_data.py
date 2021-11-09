@@ -118,6 +118,7 @@ def create_model(gt_data):
 
     device = torch.device("cuda:0")
     obj_path = os.path.join(args.cad_folder, gt_data['cad'])
+    print(obj_path)
     verts, faces, vertexSegs, faceSegs = merge_meshes(obj_path, device)
     verts[:,1:] *= -1  # pytorch3d -> world coordinate
     obj_verts = verts.to(device)
@@ -189,5 +190,6 @@ num_frames = create_model(gt_data)
 
 for index in range(num_frames):
     img_blend = display_img()
-    plt.imshow(img_blend)
-    plt.show()
+    cv2.imwrite(os.path.join("gt_visual_2", f"frame{index}.png"), img_blend*255)
+    # plt.imshow(img_blend)
+    # plt.show()

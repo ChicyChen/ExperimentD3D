@@ -154,6 +154,8 @@ def load_motion(motions, device):
     for idx, key in enumerate(motions.keys()):
         jointData = motions[key]
 
+        jointData['contact'] = [1]
+
         # if contains movable parts
         if jointData is not None:
             origin = torch.FloatTensor(jointData['axis']['origin']).to(device)

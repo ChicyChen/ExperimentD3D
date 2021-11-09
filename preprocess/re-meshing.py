@@ -4,6 +4,8 @@ import scandir
 from multiprocessing import Pool
 import json
 import common
+import os
+import pymeshlab
 
 
 def remesh(obj_path):
@@ -15,15 +17,15 @@ def remesh(obj_path):
     final_dir = os.path.join(obj_path, 'final/')
     rescale_dir = os.path.join(obj_path, 'rescale/')
 
-    # scale to .5 cube
-    subprocess.call(["python", "1_scale.py", "--in_dir", in_dir, "--out_dir", scaled_dir])
+    # # scale to .5 cube
+    # subprocess.call(["python", "1_scale.py", "--in_dir", in_dir, "--out_dir", scaled_dir])
 
-    # re-mesh using tsdf
-    subprocess.call(["python", "2_fusion.py", "--mode", "render", "--in_dir", scaled_dir, "--depth_dir", depth_dir, "--out_dir", fused_dir])
-    subprocess.call(["python", "2_fusion.py", "--mode", "fuse", "--in_dir", scaled_dir, "--depth_dir", depth_dir, "--out_dir", fused_dir])
+    # # re-mesh using tsdf
+    # subprocess.call(["python", "2_fusion.py", "--mode", "render", "--in_dir", scaled_dir, "--depth_dir", depth_dir, "--out_dir", fused_dir])
+    # subprocess.call(["python", "2_fusion.py", "--mode", "fuse", "--in_dir", scaled_dir, "--depth_dir", depth_dir, "--out_dir", fused_dir])
 
-    # simplify mesh
-    subprocess.call(["python", "3_simplify.py", "--in_dir", fused_dir, "--out_dir", out_dir])
+    # # simplify mesh
+    # subprocess.call(["python", "3_simplify.py", "--in_dir", fused_dir, "--out_dir", out_dir])
 
 
 
@@ -50,20 +52,31 @@ def remesh(obj_path):
                 # change axis
                 apply_script = "change_axis.mlx"
                 source_mesh = os.path.join(final_dir, file[0]+'_rescaled.off')
-                target_mesh = os.path.join(final_dir, file[0]+'_rescaled_sapien.off')
-                subprocess.call(["meshlabserver", "-i", source_mesh, "-o", target_mesh, "-s", apply_script])
+                
+                target_mesh_off = os.path.join(final_dir, file[0]+'_rescaled_sapien.off')
+                target_mesh_obj = os.path.join(final_dir, file[0]+'_rescaled_sapien.obj')
+                ms = pymeshlab.MeshSet()
+                ms.load_new_mesh(source_mesh)
+                ms.load_filter_script(apply_script)
+                ms.apply_filter_script()
+                ms.save_current_mesh(target_mesh_off)
+                ms.save_current_mesh(target_mesh_obj)
+                
+                # target_mesh = os.path.join(final_dir, file[0]+'_rescaled_sapien.off')
+                # subprocess.call(["meshlabserver", "-i", source_mesh, "-o", target_mesh, "-s", apply_script])
 
                 # convert to obj
-                source_mesh = os.path.join(final_dir, file[0]+'_rescaled_sapien.off')
-                target_mesh = os.path.join(final_dir, file[0]+'_rescaled_sapien.obj')
-                subprocess.call(["meshlabserver", "-i", source_mesh, "-o", target_mesh])
+                # source_mesh = os.path.join(final_dir, file[0]+'_rescaled_sapien.off')
+                # target_mesh = os.path.join(final_dir, file[0]+'_rescaled_sapien.obj')
+                # subprocess.call(["meshlabserver", "-i", source_mesh, "-o", target_mesh])
 
     return
 
 
 
-cad_folder = 'test' # cad data path (after convert_off)
-cad_classes = [f.name for f in scandir.scandir(cad_folder)]
+cad_folder = '/data/siyich/cad_sapien_2' # cad data path (after convert_off)
+# cad_classes = [f.name for f in scandir.scandir(cad_folder)]
+cad_classes = ['refrigerator']
 Processors = 10 # n of processors you want to use
 
 for cad_category in cad_classes:

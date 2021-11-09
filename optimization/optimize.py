@@ -187,7 +187,9 @@ def run_exp(inputvideo):
         cad_name = re.findall(r'\d+', obj_path)[-1]
 
         # load object mesh
+        print(obj_path)
         verts, faces, vertexSegs, faceSegs = merge_meshes(obj_path)
+        print(verts.shape)
         verts[:,1:] *= -1  # pytorch3d -> world coordinate
 
         if args.use_gt_objscale:
@@ -218,6 +220,7 @@ def run_exp(inputvideo):
         obj_faces = faces.to(device)
 
         # load motion json file
+        print(os.path.join(obj_path, 'motion.json'))
         with open(os.path.join(obj_path, 'motion.json')) as json_file:
             motions = json.load(json_file)
         assert len(motions) + 2 == len(vertexSegs)

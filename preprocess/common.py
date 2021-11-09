@@ -523,7 +523,7 @@ class Timer:
         Initialize and start timer.
         """
 
-        self.start = time.clock()
+        self.start = time.process_time()
         """ (float) Seconds. """
 
     def reset(self):
@@ -531,7 +531,7 @@ class Timer:
         Reset timer.
         """
 
-        self.start = time.clock()
+        self.start = time.process_time()
 
     def elapsed(self):
         """
@@ -541,4 +541,4 @@ class Timer:
         :rtype: float
         """
 
-        return (time.clock() - self.start)
+        return (time.process_time() - self.start)
